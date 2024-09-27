@@ -1,0 +1,35 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: ^tests/
+      - id: end-of-file-fixer
+        exclude: ^tests/
+      - id: check-yaml
+        exclude: ^tests/
+
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 24.1.1
+    hooks:
+      - id: black
+        language_version: python3.12
+        args: ['--line-length=79']
+        exclude: ^tests/
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        exclude: ^tests/
+
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.4.10
+    hooks:
+      - id: ruff
+        args:
+          [
+            '--select',
+            'T100,N801,N802,N803,N804,N805,N806,F401,F403,C901,D101,ANN001,ANN201,D102,D103',
+          ]
+        exclude: ^tests/
