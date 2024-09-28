@@ -51,7 +51,7 @@ class TestJwtFunctions:
         os.environ['JWT_EXPIRATION_TIME'] = '1000'
         token = create_jwt_token(valid_user_data)
         user_data = decode_jwt_token(token)
-        assert token_has_expired(user_data['exp']) == False
+        assert not token_has_expired(user_data['exp'])
 
 
 
