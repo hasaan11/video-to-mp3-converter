@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from auth import (JWTDecodeError, JWTTokenExpiredError, create_jwt_token,
+from auth.auth import (JWTDecodeError, JWTTokenExpiredError, create_jwt_token,
                       decode_jwt_token, get_current_user)
 
 os.environ["JWT_TOKEN_KEY"] = "test_secret"
