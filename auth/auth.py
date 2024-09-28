@@ -77,9 +77,7 @@ def decode_jwt_token(jwt_token: str) -> dict:
 def token_has_expired(expiration_time: int) -> bool:
     """Takes expiration time (in seconds) of a JWT token and checks if it has expired or not"""
     time_now = datetime.now(UTC).timestamp()
-    if time_now >= expiration_time:
-        return True
-    return False
+    return time_now >= expiration_time
 
 
 def get_current_user(jwt_token: str) -> str:
