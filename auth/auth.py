@@ -2,9 +2,19 @@ import logging
 import os
 from datetime import UTC, datetime, timedelta
 
-from jose import JWTError, jwt
+from jose import ExpiredSignatureError, JWTError, jwt
 
 ENCODING_ALGORITHM = "HS256"
+
+
+class JWTEncodeError(Exception):
+    """Custom exception for errors occurring during JWT encoding."""
+
+    def __init__(
+        self, message: str = "Failed to encode user data as JWT token"
+    ):
+        self.message = message
+        super().__init__(self.message)
 
 
 class JWTTokenExpiredError(Exception):
@@ -44,22 +54,25 @@ def create_jwt_token(user_data: dict) -> str:
             payload, os.getenv("JWT_TOKEN_KEY"), algorithm=ENCODING_ALGORITHM
         )
         return jwt_token
-    except Exception as e:
+    except JWTError as e:  # Catching specific JWTError
         logging.exception(
             "Failed to encode user data as JWT token: %s", str(e)
         )
-        raise JWTDecodeError() from e
+        raise JWTEncodeError() from e  # Raise a custom encoding error
+    except Exception as e:  # Catch any other unexpected exceptions
+        logging.exception("Unexpected error during JWT encoding: %s", str(e))
+        raise JWTEncodeError("An unexpected error occurred") from e
 
 
 def decode_jwt_token(jwt_token: str) -> dict:
     """
-    Decodes a JWT token and returns the contents as a python dictionary
+    Decodes a JWT token and returns the contents as a Python dictionary
 
     Args:
         jwt_token (str): An encoded JWT token
 
     Returns:
-        token_data (dict): A Python dictionary containing the contents of the og payload
+        token_data (dict): A Python dictionary containing the contents of the original payload
     """
     try:
         token_data = jwt.decode(
@@ -67,6 +80,9 @@ def decode_jwt_token(jwt_token: str) -> dict:
             os.getenv("JWT_TOKEN_KEY"),
             algorithms=[ENCODING_ALGORITHM],
         )
+    except ExpiredSignatureError:
+        logging.exception("JWT token has expired")
+        raise JWTTokenExpiredError("JWT token has expired")
     except JWTError as e:
         logging.exception("Could not decode JWT token: %s", str(e))
         raise JWTDecodeError() from e
@@ -78,12 +94,3 @@ def token_has_expired(expiration_time: int) -> bool:
     """Takes expiration time (in seconds) of a JWT token and checks if it has expired or not"""
     time_now = datetime.now(UTC).timestamp()
     return time_now >= expiration_time
-
-
-def get_current_user(jwt_token: str) -> str:
-    """Calls the decode_jwt_token function and returns the username of the user."""
-    token_data = decode_jwt_token(jwt_token)
-    if token_has_expired(token_data["exp"]):
-        raise JWTTokenExpiredError
-
-    return token_data["username"]
