@@ -7,7 +7,13 @@ def setup_test_env():
     os.environ['JWT_EXPIRATION_TIME'] = '100'
 
 class TestJwtFunctions:
-    "Test suite for testing JWT functions"
+    """
+    Test suite for JWT authentication functions.
+    
+    This class contains tests for token creation, decoding,
+    expiration handling, and tampering detection to ensure
+    the robustness and security of the JWT implementation.
+    """
 
     @pytest.fixture
     def valid_user_data(self):
