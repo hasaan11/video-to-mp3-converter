@@ -4,7 +4,7 @@ from auth.auth import JWTDecodeError, JWTTokenExpiredError, create_jwt_token, de
 def setup_test_env():
     import os
     os.environ['JWT_TOKEN_KEY'] = 'test_secret'
-    os.environ['JWT_EXPIRATiON_TIME'] = '100'
+    os.environ['JWT_EXPIRATION_TIME'] = '100'
 
 class TestJwtFunctions:
     "Test suite for testing JWT functions"
@@ -18,6 +18,17 @@ class TestJwtFunctions:
         jwt_token = create_jwt_token(valid_user_data)
 
         assert len(jwt_token.split('.')) == 3
+        
+        decoded_user_data = decode_jwt_token(jwt_token)
+
+        assert 'username' in decoded_user_data
+        assert 'email' in decoded_user_data
+        assert 'exp' in decoded_user_data
+
+        assert decoded_user_data['username'] == valid_user_data['username']
+        assert decoded_user_data['email'] == valid_user_data['email']
+
+
 
     @pytest.mark.parametrize("invalid_token", ['invalid_token', 'random gibberish', '12389uoadnjkasndnasn83onadjnjkdnas'])
     def test_decode_jwt_token_invalid(self, invalid_token):

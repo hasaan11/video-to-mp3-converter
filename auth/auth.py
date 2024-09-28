@@ -82,7 +82,7 @@ def decode_jwt_token(jwt_token: str) -> dict:
         )
     except ExpiredSignatureError:
         logging.exception("JWT token has expired")
-        raise JWTTokenExpiredError("JWT token has expired")
+        raise JWTTokenExpiredError("JWT token has expired") from None
     except JWTError as e:
         logging.exception("Could not decode JWT token: %s", str(e))
         raise JWTDecodeError() from e
