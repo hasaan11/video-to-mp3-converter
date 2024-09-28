@@ -48,7 +48,7 @@ def create_jwt_token(user_data: dict) -> str:
         logging.exception(
             "Failed to encode user data as JWT token: %s", str(e)
         )
-        raise JWTDecodeError()
+        raise JWTDecodeError() from e
 
 
 def decode_jwt_token(jwt_token: str) -> dict:
@@ -69,7 +69,7 @@ def decode_jwt_token(jwt_token: str) -> dict:
         )
     except JWTError as e:
         logging.exception("Could not decode JWT token: %s", str(e))
-        raise JWTDecodeError()
+        raise JWTDecodeError() from e
 
     return token_data
 
