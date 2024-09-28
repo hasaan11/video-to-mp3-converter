@@ -1,28 +1,66 @@
-import os
-from datetime import UTC, datetime
-
 import pytest
+from auth.auth import JWTDecodeError, JWTTokenExpiredError, create_jwt_token, decode_jwt_token, token_has_expired
+@pytest.fixture(autouse=True)
+def setup_test_env():
+    import os
+    os.environ['JWT_TOKEN_KEY'] = 'test_secret'
+    os.environ['JWT_EXPIRATiON_TIME'] = '100'
 
-from auth.auth import (JWTDecodeError, JWTTokenExpiredError, create_jwt_token,
-                      decode_jwt_token, get_current_user)
+class TestJwtFunctions:
+    "Test suite for testing JWT functions"
 
-os.environ["JWT_TOKEN_KEY"] = "test_secret"
-os.environ["JWT_EXPIRATION_TIME"] = "3600"
+    @pytest.fixture
+    def valid_user_data(self):
+        return {'username': 'test_user', 'email':'test_user@example.com'}
+    
+    def test_create_jwt_token(self, valid_user_data):
+
+        jwt_token = create_jwt_token(valid_user_data)
+
+        assert len(jwt_token.split('.')) == 3
+
+    @pytest.mark.parametrize("invalid_token", ['invalid_token', 'random gibberish', '12389uoadnjkasndnasn83onadjnjkdnas'])
+    def test_decode_jwt_token_invalid(self, invalid_token):
+        with pytest.raises(JWTDecodeError):
+            decode_jwt_token(invalid_token)
+
+    
+    def test_token_expiration(self, valid_user_data):
+        import os
+        import time
+
+        os.environ['JWT_EXPIRATION_TIME'] = '10'
+
+        token = create_jwt_token(valid_user_data)
+        time.sleep(12)
+
+        with pytest.raises(JWTTokenExpiredError):
+            decode_jwt_token(token)
+
+        os.environ['JWT_EXPIRATION_TIME'] = '1000'
+        token = create_jwt_token(valid_user_data)
+        user_data = decode_jwt_token(token)
+        assert token_has_expired(user_data['exp']) == False
 
 
-def test_create_jwt_token():
-    user_data = {"username": "test_user", "email": "test_user@example.com"}
-    token = create_jwt_token(user_data)
 
-    assert isinstance(token, str)
-    assert len(token) > 0
+    def test_token_tampering(self, valid_user_data):
+        import os
+        import random
 
-    decoded_data = decode_jwt_token(token)
-    assert decoded_data["username"] == user_data["username"]
-    assert decoded_data["email"] == user_data["email"]
-    assert "exp" in decoded_data
+        os.environ['JWT_EXPIRATION_TIME'] = '100'
+        token = create_jwt_token(valid_user_data)
 
+        token_list = list(token)
 
-def test_decode_jwt_token_invalid():
-    with pytest.raises(JWTDecodeError):
-        decode_jwt_token("invalid_token")
+        random_index = random.randrange(len(token))
+
+        original_char = token_list[random_index]
+        new_char = chr((ord(original_char) + 1) % 128) 
+        token_list[random_index] = new_char
+
+        modified_token = ''.join(token_list)
+
+        with pytest.raises(JWTDecodeError):
+            decode_jwt_token(modified_token)
+

@@ -13,5 +13,5 @@ reviews:
     drafts: false
 chat:
   auto_reply: true
-tone_instructuions:
+tone_instructions:
   description: Ensure codebase is uniform, standards are met, tests are properly written and business logic is solid.
