@@ -39,7 +39,7 @@ def generate_jwt_token(request_data: GenerateTokenRequest) -> JSONResponse:
     """This endpoint generates a JWT token which will be sent by the user in subsequent requests. The token is used for authentiating purposes."""
 
     user_data = request_data.model_dump()
-    if user_exists(user_data["username", user_data["password"]]):
+    if user_exists(user_data["username"], user_data["password"]):
         del user_data["password"]
         try:
             jwt_token = create_jwt_token(user_data)
@@ -56,7 +56,7 @@ def generate_jwt_token(request_data: GenerateTokenRequest) -> JSONResponse:
     else:
         raise HTTPException(
             status_code=401, detail="Incorrect username or password!"
-        )
+        ) from None
 
 
 @app.post("/authenticate-user")
@@ -75,10 +75,10 @@ def authenticate_user(token: str = Depends(oauth2_scheme)) -> JSONResponse:
         raise HTTPException(
             status_code=401,
             detail="Your token has expired. Please generate a new token!",
-        )
+        ) from None
 
     except JWTDecodeError:
         raise HTTPException(
             status_code=401,
             detail="Could not decode the token. This indicates potential tampering. Please generate a new token!",
-        )
+        ) from None
