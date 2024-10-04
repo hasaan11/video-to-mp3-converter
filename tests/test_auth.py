@@ -1,5 +1,5 @@
 import pytest
-from auth.auth import JWTDecodeError, JWTTokenExpiredError, create_jwt_token, decode_jwt_token, token_has_expired
+from auth import JWTDecodeError, JWTTokenExpiredError, create_jwt_token, decode_jwt_token, token_has_expired
 @pytest.fixture(autouse=True)
 def setup_test_env():
     import os
