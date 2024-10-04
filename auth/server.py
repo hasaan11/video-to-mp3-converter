@@ -39,7 +39,7 @@ def generate_jwt_token(request_data: GenerateTokenRequest) -> JSONResponse:
     """This endpoint generates a JWT token which will be sent by the user in subsequent requests. The token is used for authentiating purposes."""
 
     user_data = request_data.model_dump()
-    if user_exists(user_data["username"], user_data["password"]):
+    if user_exists(user_data):
         del user_data["password"]
         try:
             jwt_token = create_jwt_token(user_data)

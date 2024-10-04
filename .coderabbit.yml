@@ -14,4 +14,4 @@ reviews:
 chat:
   auto_reply: true
 tone_instructions:
-  description: Ensure codebase is uniform, standards are met, tests are properly written and business logic is solid.
+  description: "Ensure codebase is uniform, standards are met, tests are properly written and business logic is solid."
